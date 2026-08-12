@@ -75,9 +75,9 @@ bool assignTerminalTo(pid_t pgid) {
 }
 } // namespace
 
-int Jobs::fg(int id) {
+int Jobs::fg(int jobId) {
     for (auto &job : jobs_) {
-        if (job.id != id) {
+        if (job.id != jobId) {
             continue;
         }
         if (job.state == JobInfo::State::Done) {
@@ -90,24 +90,26 @@ int Jobs::fg(int id) {
         int status = 0;
         int lastStatus = 0;
         while (true) {
-            pid_t rc = waitpid(-job.pgid, &status, WUNTRACED);
-            if (rc > 0) {
+            pid_t waitResult = waitpid(-job.pgid, &status, WUNTRACED);
+            if (waitResult > 0) {
                 if (WIFSTOPPED(status)) {
                     if (terminalHandoff) {
                         assignTerminalTo(shellPgid_ > 0 ? shellPgid_ : getpgrp());
                     }
                     job.state = JobInfo::State::Stopped;
                     std::cout << "[" << job.id << "] Stopped " << job.command << "\n";
-                    return 128 + WSTOPSIG(status);
+                    constexpr int SIGNAL_BASE = 128;
+                    return SIGNAL_BASE + WSTOPSIG(status);
                 }
                 if (WIFEXITED(status)) {
                     lastStatus = WEXITSTATUS(status);
                 } else if (WIFSIGNALED(status)) {
-                    lastStatus = 128 + WTERMSIG(status);
+                    constexpr int SIGNAL_BASE = 128;
+                    lastStatus = SIGNAL_BASE + WTERMSIG(status);
                 }
                 continue;
             }
-            if (rc == -1 && errno == EINTR) {
+            if (waitResult == -1 && errno == EINTR) {
                 continue;
             }
             break;
@@ -122,9 +124,9 @@ int Jobs::fg(int id) {
     return 1;
 }
 
-int Jobs::bg(int id) {
+int Jobs::bg(int jobId) {
     for (auto &job : jobs_) {
-        if (job.id != id) {
+        if (job.id != jobId) {
             continue;
         }
         if (job.state == JobInfo::State::Done) {

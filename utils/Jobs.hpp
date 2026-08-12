@@ -1,11 +1,12 @@
 #pragma once
 
 #include <sys/types.h>
+#include <cstdint>
 #include <string>
 #include <vector>
 
 struct JobInfo {
-    enum class State { Running, Stopped, Done };
+    enum class State : std::uint8_t { Running, Stopped, Done };
 
     int id;
     pid_t pgid;
@@ -20,8 +21,8 @@ class Jobs {
                    JobInfo::State state = JobInfo::State::Running);
     static void reapFinished();
     static const std::vector<JobInfo> &list();
-    static int fg(int id);
-    static int bg(int id);
+    static int fg(int jobId);
+    static int bg(int jobId);
     static pid_t shellProcessGroup();
 
   private:

@@ -202,7 +202,7 @@ void Shell::run() {
 #ifdef USE_READLINE
         if (isInteractive) {
             Signal::setPrompting(false);
-            char* line = readline("mysh> ");
+            char *line = readline("mysh> ");
             Signal::setPrompting(true);
             if (line == nullptr) {
                 std::cout << "\n";
@@ -225,7 +225,8 @@ void Shell::run() {
         Signal::setPrompting(false);
         if (!std::getline(std::cin, input)) {
             Signal::setPrompting(true);
-            if (isInteractive) std::cout << "\n";
+            if (isInteractive)
+                std::cout << "\n";
             break;
         }
         Signal::setPrompting(true);

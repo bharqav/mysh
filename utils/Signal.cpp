@@ -6,11 +6,14 @@
 namespace {
 volatile sig_atomic_t g_prompting = 1;
 
-void handleSigint(int) {
+void handleSigint(int signum) {
+    (void)signum; // unused
     const char *prompt = "\nmysh> ";
     const char *newline = "\n";
-    const char *out = g_prompting ? prompt : newline;
-    if (write(STDOUT_FILENO, out, g_prompting ? 7 : 1) < 0) {
+    const char *out = (g_prompting != 0) ? prompt : newline;
+    const int promptLength = 7;
+    const int newlineLength = 1;
+    if (write(STDOUT_FILENO, out, (g_prompting != 0) ? promptLength : newlineLength) < 0) {
         // Ignored in signal handler
     }
 }
