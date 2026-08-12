@@ -233,18 +233,6 @@ std::string pipelineToString(const Pipeline& pipeline) {
     return text;
 }
 
-std::string assignmentPrefixToString(const std::vector<Assignment>& assignments) {
-    std::string text;
-    for (const auto& assignment : assignments) {
-        if (!text.empty()) {
-            text += " ";
-        }
-        text += assignment.key + "=" + assignment.value;
-    }
-    return text;
-}
-
-namespace {
 int executePipeline(const Pipeline& pipeline, Environment& env, bool background) {
     if (pipeline.commands.empty()) {
         return 0;
@@ -431,10 +419,6 @@ int executePipeline(const Pipeline& pipeline, Environment& env, bool background)
 
     return lastStatus;
 }
-
-} // namespace
-
-namespace {
 int evaluateNode(const Expr* node, Environment& env);
 
 int evaluate(const Expr* node, Environment& env) {
