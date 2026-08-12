@@ -7,9 +7,9 @@ namespace {
 volatile sig_atomic_t g_prompting = 1;
 
 void handleSigint(int) {
-    const char* prompt = "\nmysh> ";
-    const char* newline = "\n";
-    const char* out = g_prompting ? prompt : newline;
+    const char *prompt = "\nmysh> ";
+    const char *newline = "\n";
+    const char *out = g_prompting ? prompt : newline;
     if (write(STDOUT_FILENO, out, g_prompting ? 7 : 1) < 0) {
         // Ignored in signal handler
     }
@@ -22,6 +22,4 @@ void Signal::setupInteractiveHandlers() {
     std::signal(SIGTSTP, SIG_IGN);
 }
 
-void Signal::setPrompting(bool prompting) {
-    g_prompting = prompting ? 1 : 0;
-}
+void Signal::setPrompting(bool prompting) { g_prompting = prompting ? 1 : 0; }

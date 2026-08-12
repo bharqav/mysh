@@ -3,9 +3,9 @@
 #include <iostream>
 
 int builtin_jobs() {
-    auto all = Jobs::list();
-    for (const auto& job : all) {
-        const char* state = "Done";
+    const auto &all = Jobs::list();
+    for (const auto &job : all) {
+        const char *state = "Done";
         if (job.state == JobInfo::State::Running) {
             state = "Running";
         } else if (job.state == JobInfo::State::Stopped) {

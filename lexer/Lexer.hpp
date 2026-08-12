@@ -6,6 +6,6 @@
 #include <vector>
 
 class Lexer {
-public:
-    static std::vector<Token> tokenize(const std::string& input, const Environment& env);
+  public:
+    static std::vector<Token> tokenize(const std::string &input, const Environment &env);
 };

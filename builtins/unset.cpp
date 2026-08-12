@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace {
-bool isValidIdentifier(const std::string& name) {
+bool isValidIdentifier(const std::string &name) {
     if (name.empty()) {
         return false;
     }
@@ -23,7 +23,7 @@ bool isValidIdentifier(const std::string& name) {
 }
 } // namespace
 
-int builtin_unset(const std::vector<std::string>& args, Environment& env) {
+int builtin_unset(const std::vector<std::string> &args, Environment &env) {
     int rc = 0;
     for (std::size_t i = 1; i < args.size(); ++i) {
         if (!isValidIdentifier(args[i])) {

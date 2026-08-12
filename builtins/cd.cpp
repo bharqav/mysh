@@ -4,26 +4,24 @@
 #include <unistd.h>
 #include <vector>
 
-int builtin_cd(const std::vector<std::string>& args, Environment& env) {
-    const char* target = nullptr;
+int builtin_cd(const std::vector<std::string> &args, Environment &env) {
+    std::string target;
     bool printTarget = false;
     if (args.size() < 2) {
-        std::string home = env.get("HOME");
-        if (home.empty()) {
+        target = env.get("HOME");
+        if (target.empty()) {
             std::cerr << "cd: HOME not set\n";
             return 1;
         }
-        target = home.c_str();
     } else if (args[1] == "-") {
-        std::string oldpwd = env.get("OLDPWD");
-        if (oldpwd.empty()) {
+        target = env.get("OLDPWD");
+        if (target.empty()) {
             std::cerr << "cd: OLDPWD not set\n";
             return 1;
         }
-        target = oldpwd.c_str();
         printTarget = true;
     } else {
-        target = args[1].c_str();
+        target = args[1];
     }
 
     char oldCwd[4096];
@@ -31,7 +29,7 @@ int builtin_cd(const std::vector<std::string>& args, Environment& env) {
         oldCwd[0] = '\0';
     }
 
-    if (chdir(target) != 0) {
+    if (chdir(target.c_str()) != 0) {
         perror("cd");
         return 1;
     }

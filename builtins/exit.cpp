@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-int builtin_exit(const std::vector<std::string>& args) {
+int builtin_exit(const std::vector<std::string> &args) {
     int code = 0;
     if (args.size() > 1) {
         try {

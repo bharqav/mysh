@@ -4,12 +4,7 @@
 #include <string>
 #include <vector>
 
-enum class RedirectionType {
-    In,
-    Out,
-    Append,
-    Heredoc
-};
+enum class RedirectionType { In, Out, Append, Heredoc };
 
 struct Redirection {
     RedirectionType type;
@@ -34,13 +29,7 @@ struct Pipeline {
 struct Expr;
 using ExprPtr = std::unique_ptr<Expr>;
 
-enum class ExprKind {
-    Pipeline,
-    Sequence,
-    And,
-    Or,
-    Subshell
-};
+enum class ExprKind { Pipeline, Sequence, And, Or, Subshell };
 
 struct Expr {
     ExprKind kind;

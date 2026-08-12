@@ -20,9 +20,9 @@
 
 namespace {
 struct ScopedAssignments {
-    explicit ScopedAssignments(Environment& env, const std::vector<Assignment>& assignments)
+    explicit ScopedAssignments(Environment &env, const std::vector<Assignment> &assignments)
         : env_(env) {
-        for (const auto& assignment : assignments) {
+        for (const auto &assignment : assignments) {
             if (seen_.find(assignment.key) == seen_.end()) {
                 if (env_.contains(assignment.key)) {
                     saved_.push_back({assignment.key, env_.get(assignment.key), true});
@@ -45,34 +45,34 @@ struct ScopedAssignments {
         }
     }
 
-private:
+  private:
     struct SavedValue {
         std::string key;
         std::string value;
         bool hadValue;
     };
 
-    Environment& env_;
+    Environment &env_;
     std::vector<SavedValue> saved_;
     std::unordered_set<std::string> seen_;
 };
 
-bool isAssignmentOnlyCommand(const Command& cmd) {
+bool isAssignmentOnlyCommand(const Command &cmd) {
     return cmd.args.empty() && !cmd.assignments.empty();
 }
 
-void applyAssignments(Environment& env, const std::vector<Assignment>& assignments) {
-    for (const auto& assignment : assignments) {
+void applyAssignments(Environment &env, const std::vector<Assignment> &assignments) {
+    for (const auto &assignment : assignments) {
         env.set(assignment.key, assignment.value);
     }
 }
 } // namespace
 
 namespace {
-std::vector<std::string> expandWildcards(const std::vector<std::string>& args);
+std::vector<std::string> expandWildcards(const std::vector<std::string> &args);
 
-int applyRedirections(const Command& cmd) {
-    for (const auto& redir : cmd.redirections) {
+int applyRedirections(const Command &cmd) {
+    for (const auto &redir : cmd.redirections) {
         int fd = -1;
         if (redir.type == RedirectionType::In) {
             fd = open(redir.target.c_str(), O_RDONLY);
@@ -142,7 +142,7 @@ int applyRedirections(const Command& cmd) {
     return 0;
 }
 
-int runBuiltinInParentWithRedirections(const Command& cmd, Environment& env) {
+int runBuiltinInParentWithRedirections(const Command &cmd, Environment &env) {
     std::vector<std::string> args = expandWildcards(cmd.args);
 
     int stdinBackup = dup(STDIN_FILENO);
@@ -189,15 +189,15 @@ bool handoffTerminalTo(pid_t pgid) {
     return true;
 }
 
-std::vector<std::string> expandWildcards(const std::vector<std::string>& args) {
+std::vector<std::string> expandWildcards(const std::vector<std::string> &args) {
     std::vector<std::string> expanded;
-    for (const auto& arg : args) {
+    for (const auto &arg : args) {
         if (arg.find('*') == std::string::npos && arg.find('?') == std::string::npos &&
             arg.find('[') == std::string::npos) {
             expanded.push_back(arg);
             continue;
         }
-        glob_t matches {};
+        glob_t matches{};
         int rc = glob(arg.c_str(), 0, nullptr, &matches);
         if (rc == 0) {
             for (std::size_t i = 0; i < matches.gl_pathc; ++i) {
@@ -211,10 +211,10 @@ std::vector<std::string> expandWildcards(const std::vector<std::string>& args) {
     return expanded;
 }
 
-std::string pipelineToString(const Pipeline& pipeline) {
+std::string pipelineToString(const Pipeline &pipeline) {
     std::string text;
     for (std::size_t i = 0; i < pipeline.commands.size(); ++i) {
-        for (const auto& assignment : pipeline.commands[i].assignments) {
+        for (const auto &assignment : pipeline.commands[i].assignments) {
             if (!text.empty()) {
                 text += " ";
             }
@@ -233,12 +233,12 @@ std::string pipelineToString(const Pipeline& pipeline) {
     return text;
 }
 
-int executePipeline(const Pipeline& pipeline, Environment& env, bool background) {
+int executePipeline(const Pipeline &pipeline, Environment &env, bool background) {
     if (pipeline.commands.empty()) {
         return 0;
     }
 
-    const Command& firstCommand = pipeline.commands.front();
+    const Command &firstCommand = pipeline.commands.front();
     if (pipeline.commands.size() == 1 && isAssignmentOnlyCommand(firstCommand)) {
         applyAssignments(env, firstCommand.assignments);
         return 0;
@@ -302,7 +302,8 @@ int executePipeline(const Pipeline& pipeline, Environment& env, bool background)
             }
 
             if (applyRedirections(pipeline.commands[i]) != 0) {
-                std::cout.flush(); std::cerr.flush();
+                std::cout.flush();
+                std::cerr.flush();
                 _exit(1);
             }
 
@@ -310,20 +311,22 @@ int executePipeline(const Pipeline& pipeline, Environment& env, bool background)
                 Builtins::isBuiltin(pipeline.commands[i].args[0])) {
                 std::vector<std::string> args = expandWildcards(pipeline.commands[i].args);
                 int code = Builtins::run(args, env, false);
-                std::cout.flush(); std::cerr.flush();
+                std::cout.flush();
+                std::cerr.flush();
                 _exit(code);
             }
 
             std::vector<std::string> args = expandWildcards(pipeline.commands[i].args);
-            std::vector<char*> argv;
-            for (auto& arg : args) {
-                argv.push_back(const_cast<char*>(arg.c_str()));
+            std::vector<char *> argv;
+            for (auto &arg : args) {
+                argv.push_back(const_cast<char *>(arg.c_str()));
             }
             argv.push_back(nullptr);
 
             execvp(argv[0], argv.data());
             perror("execvp");
-            std::cout.flush(); std::cerr.flush();
+            std::cout.flush();
+            std::cerr.flush();
             _exit(127);
         }
 
@@ -331,7 +334,9 @@ int executePipeline(const Pipeline& pipeline, Environment& env, bool background)
             Trace::CommandTiming tcmd;
             tcmd.cmd = !pipeline.commands[i].args.empty() ? pipeline.commands[i].args[0] : "";
             tcmd.pid = pid;
-            tcmd.startMs = std::chrono::duration_cast<std::chrono::milliseconds>(commandStart - traceStartTime).count();
+            tcmd.startMs =
+                std::chrono::duration_cast<std::chrono::milliseconds>(commandStart - traceStartTime)
+                    .count();
             tcmd.durationMs = 0;
             evt.commands.push_back(tcmd);
         }
@@ -372,10 +377,13 @@ int executePipeline(const Pipeline& pipeline, Environment& env, bool background)
         if (rc > 0) {
             if (doTrace) {
                 auto finishedAt = std::chrono::steady_clock::now();
-                for (auto& command : evt.commands) {
+                for (auto &command : evt.commands) {
                     if (command.pid == rc) {
-                        auto commandStartTime = traceStartTime + std::chrono::milliseconds(command.startMs);
-                        command.durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(finishedAt - commandStartTime).count();
+                        auto commandStartTime =
+                            traceStartTime + std::chrono::milliseconds(command.startMs);
+                        command.durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                                 finishedAt - commandStartTime)
+                                                 .count();
                         break;
                     }
                 }
@@ -416,15 +424,17 @@ int executePipeline(const Pipeline& pipeline, Environment& env, bool background)
         auto traceEndTime = std::chrono::steady_clock::now();
         evt.processGroup = processGroup;
         evt.exitCode = lastStatus;
-        evt.elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(traceEndTime - traceStartTime).count();
+        evt.elapsedMs =
+            std::chrono::duration_cast<std::chrono::milliseconds>(traceEndTime - traceStartTime)
+                .count();
         Trace::emit(evt, mode);
     }
 
     return lastStatus;
 }
-int evaluateNode(const Expr* node, Environment& env);
+int evaluateNode(const Expr *node, Environment &env);
 
-int evaluate(const Expr* node, Environment& env) {
+int evaluate(const Expr *node, Environment &env) {
     if (node == nullptr) {
         return 0;
     }
@@ -435,7 +445,7 @@ int evaluate(const Expr* node, Environment& env) {
     return evaluateNode(node, env);
 }
 
-int evaluateNode(const Expr* node, Environment& env) {
+int evaluateNode(const Expr *node, Environment &env) {
     if (node == nullptr) {
         return 0;
     }
@@ -450,7 +460,8 @@ int evaluateNode(const Expr* node, Environment& env) {
         }
         if (pid == 0) {
             int code = evaluate(node->left.get(), env);
-            std::cout.flush(); std::cerr.flush();
+            std::cout.flush();
+            std::cerr.flush();
             _exit(code);
         }
 
@@ -489,6 +500,4 @@ int evaluateNode(const Expr* node, Environment& env) {
 }
 } // namespace
 
-int Executor::execute(const ExprPtr& root, Environment& env) {
-    return evaluate(root.get(), env);
-}
+int Executor::execute(const ExprPtr &root, Environment &env) { return evaluate(root.get(), env); }

@@ -2,7 +2,7 @@
 
 #include <string>
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     Shell shell;
     if (argc >= 3 && std::string(argv[1]) == "-c") {
         return shell.runLine(argv[2]);

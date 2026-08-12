@@ -17,11 +17,9 @@
 #include <readline/readline.h>
 #endif
 
-Shell::Shell() : lastStatus_(0) {
-    env_.set("SHELL_STATUS", "0");
-}
+Shell::Shell() : lastStatus_(0) { env_.set("SHELL_STATUS", "0"); }
 
-int Shell::runLine(const std::string& input) {
+int Shell::runLine(const std::string &input) {
     if (input.empty()) {
         return lastStatus_;
     }
@@ -31,7 +29,7 @@ int Shell::runLine(const std::string& input) {
         auto program = Parser::parse(tokens);
         lastStatus_ = Executor::execute(program, env_);
         env_.set("SHELL_STATUS", std::to_string(lastStatus_));
-    } catch (const std::exception& ex) {
+    } catch (const std::exception &ex) {
         std::cerr << "mysh: " << ex.what() << "\n";
         lastStatus_ = 2;
         env_.set("SHELL_STATUS", "2");
@@ -41,7 +39,7 @@ int Shell::runLine(const std::string& input) {
 }
 
 namespace {
-std::string joinWords(const std::vector<std::string>& words) {
+std::string joinWords(const std::vector<std::string> &words) {
     std::ostringstream out;
     for (std::size_t i = 0; i < words.size(); ++i) {
         if (i > 0) {
@@ -52,14 +50,14 @@ std::string joinWords(const std::vector<std::string>& words) {
     return out.str();
 }
 
-std::string commandToString(const Command& command) {
+std::string commandToString(const Command &command) {
     std::ostringstream out;
-    for (const auto& assignment : command.assignments) {
+    for (const auto &assignment : command.assignments) {
         out << assignment.key << '=' << assignment.value << ' ';
     }
     out << joinWords(command.args);
-    for (const auto& redirection : command.redirections) {
-        const char* symbol = "<";
+    for (const auto &redirection : command.redirections) {
+        const char *symbol = "<";
         if (redirection.type == RedirectionType::Out) {
             symbol = ">";
         } else if (redirection.type == RedirectionType::Append) {
@@ -75,7 +73,7 @@ std::string commandToString(const Command& command) {
     return out.str();
 }
 
-std::string commandLabel(const Command& command) {
+std::string commandLabel(const Command &command) {
     if (!command.args.empty()) {
         return command.args.front();
     }
@@ -89,14 +87,15 @@ struct ExplainSteps {
     int next = 1;
 };
 
-void printStep(ExplainSteps& steps, int indent, const std::string& text) {
+void printStep(ExplainSteps &steps, int indent, const std::string &text) {
     const std::string pad(indent, ' ');
     std::cout << pad << steps.next++ << ". " << text << "\n";
 }
 
-void renderExplainNode(const Expr* node, int indent, ExplainSteps& steps);
+void renderExplainNode(const Expr *node, int indent, ExplainSteps &steps);
 
-void renderPipelineExplain(const Pipeline& pipeline, bool background, int indent, ExplainSteps& steps) {
+void renderPipelineExplain(const Pipeline &pipeline, bool background, int indent,
+                           ExplainSteps &steps) {
     const std::size_t count = pipeline.commands.size();
     if (count == 0) {
         return;
@@ -108,17 +107,19 @@ void renderPipelineExplain(const Pipeline& pipeline, bool background, int indent
 
     if (count == 1 && !pipeline.commands[0].args.empty() &&
         Builtins::isBuiltin(pipeline.commands[0].args[0]) && !background) {
-        printStep(steps, indent, "Run builtin in parent process: " + commandToString(pipeline.commands[0]));
+        printStep(steps, indent,
+                  "Run builtin in parent process: " + commandToString(pipeline.commands[0]));
     } else {
         for (std::size_t i = 0; i < count; ++i) {
-            printStep(steps, indent, "Fork child process for: " + commandToString(pipeline.commands[i]));
+            printStep(steps, indent,
+                      "Fork child process for: " + commandToString(pipeline.commands[i]));
         }
     }
 
     for (std::size_t i = 0; i + 1 < count; ++i) {
         printStep(steps, indent,
-                  "Connect stdout of " + commandLabel(pipeline.commands[i]) +
-                      " to stdin of " + commandLabel(pipeline.commands[i + 1]));
+                  "Connect stdout of " + commandLabel(pipeline.commands[i]) + " to stdin of " +
+                      commandLabel(pipeline.commands[i + 1]));
     }
 
     printStep(steps, indent, "Execute command(s)");
@@ -130,7 +131,7 @@ void renderPipelineExplain(const Pipeline& pipeline, bool background, int indent
     }
 }
 
-void renderExplainNode(const Expr* node, int indent, ExplainSteps& steps) {
+void renderExplainNode(const Expr *node, int indent, ExplainSteps &steps) {
     if (node == nullptr) {
         return;
     }
@@ -166,7 +167,7 @@ void renderExplainNode(const Expr* node, int indent, ExplainSteps& steps) {
 }
 } // namespace
 
-int Shell::explainLine(const std::string& input) {
+int Shell::explainLine(const std::string &input) {
     if (input.empty()) {
         return 0;
     }
@@ -179,7 +180,7 @@ int Shell::explainLine(const std::string& input) {
         renderExplainNode(program.get(), 2, steps);
         std::cout << "\n";
         return 0;
-    } catch (const std::exception& ex) {
+    } catch (const std::exception &ex) {
         std::cerr << "mysh: " << ex.what() << "\n";
         return 2;
     }
@@ -198,7 +199,7 @@ void Shell::run() {
         std::string input;
 #ifdef USE_READLINE
         Signal::setPrompting(false);
-        char* line = readline("mysh> ");
+        char *line = readline("mysh> ");
         Signal::setPrompting(true);
         if (line == nullptr) {
             std::cout << "\n";

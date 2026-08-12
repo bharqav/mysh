@@ -10,30 +10,26 @@ int Jobs::nextId_ = 1;
 pid_t Jobs::shellPgid_ = -1;
 std::vector<JobInfo> Jobs::jobs_;
 
-void Jobs::initShellProcessGroup(pid_t pgid) {
-    shellPgid_ = pgid;
-}
+void Jobs::initShellProcessGroup(pid_t pgid) { shellPgid_ = pgid; }
 
-pid_t Jobs::shellProcessGroup() {
-    return shellPgid_;
-}
+pid_t Jobs::shellProcessGroup() { return shellPgid_; }
 
-int Jobs::add(pid_t pgid, const std::string& command, JobInfo::State state) {
-    for (auto& existing : jobs_) {
+int Jobs::add(pid_t pgid, const std::string &command, JobInfo::State state) {
+    for (auto &existing : jobs_) {
         if (existing.pgid == pgid) {
             existing.command = command;
             existing.state = state;
             return existing.id;
         }
     }
-    JobInfo job {nextId_++, pgid, command, state};
+    JobInfo job{nextId_++, pgid, command, state};
     jobs_.push_back(job);
     std::cout << "[" << job.id << "] " << job.pgid << "\n";
     return job.id;
 }
 
 void Jobs::reapFinished() {
-    for (auto& job : jobs_) {
+    for (auto &job : jobs_) {
         if (job.state == JobInfo::State::Done) {
             continue;
         }
@@ -64,9 +60,7 @@ void Jobs::reapFinished() {
     }
 }
 
-std::vector<JobInfo> Jobs::list() {
-    return jobs_;
-}
+const std::vector<JobInfo> &Jobs::list() { return jobs_; }
 
 namespace {
 bool assignTerminalTo(pid_t pgid) {
@@ -82,7 +76,7 @@ bool assignTerminalTo(pid_t pgid) {
 } // namespace
 
 int Jobs::fg(int id) {
-    for (auto& job : jobs_) {
+    for (auto &job : jobs_) {
         if (job.id != id) {
             continue;
         }
@@ -129,7 +123,7 @@ int Jobs::fg(int id) {
 }
 
 int Jobs::bg(int id) {
-    for (auto& job : jobs_) {
+    for (auto &job : jobs_) {
         if (job.id != id) {
             continue;
         }

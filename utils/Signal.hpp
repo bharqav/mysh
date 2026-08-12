@@ -1,7 +1,7 @@
 #pragma once
 
 class Signal {
-public:
+  public:
     static void setupInteractiveHandlers();
     static void setPrompting(bool prompting);
 };

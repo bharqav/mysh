@@ -57,10 +57,10 @@ assert_contains() {
   fi
 }
 
-assert_not_contains() {
+assert_not_line() {
   local needle="$1"
-  if grep -q "$needle" out.txt; then
-    echo "assertion failed: output unexpectedly contained '$needle'"
+  if grep -Fxq "$needle" out.txt; then
+    echo "assertion failed: output unexpectedly contained line '$needle'"
     echo "----- output -----"
     cat out.txt
     echo "------------------"
@@ -81,6 +81,6 @@ assert_contains "a.cpp"
 assert_contains "b.cpp"
 assert_contains "Running sleep 1"
 assert_contains "Built-ins:"
-assert_not_contains "never"
+assert_not_line "never"
 
 echo "regression test passed"

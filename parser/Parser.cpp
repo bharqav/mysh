@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 namespace {
-const char* tokenName(TokenType t) {
+const char *tokenName(TokenType t) {
     switch (t) {
     case TokenType::WORD:
         return "word";
@@ -37,7 +37,7 @@ const char* tokenName(TokenType t) {
     }
 }
 
-std::runtime_error syntaxError(const std::string& message, const Token* tok) {
+std::runtime_error syntaxError(const std::string &message, const Token *tok) {
     std::ostringstream oss;
     oss << "parse error: " << message;
     if (tok != nullptr) {
@@ -65,7 +65,7 @@ RedirectionType mapTokenToRedir(TokenType t) {
     }
 }
 
-Assignment parseAssignment(const std::string& token) {
+Assignment parseAssignment(const std::string &token) {
     std::size_t eq = token.find('=');
     if (eq == std::string::npos || eq == 0) {
         throw std::runtime_error("internal parse error: invalid assignment token");
@@ -77,25 +77,21 @@ Assignment parseAssignment(const std::string& token) {
 }
 
 class ParserImpl {
-public:
-    explicit ParserImpl(const std::vector<Token>& tokens) : tokens_(tokens), pos_(0) {}
+  public:
+    explicit ParserImpl(const std::vector<Token> &tokens) : tokens_(tokens), pos_(0) {}
 
-    ExprPtr parseExpression() {
-        return parseSequence();
-    }
+    ExprPtr parseExpression() { return parseSequence(); }
 
-    bool atEnd() const {
-        return pos_ >= tokens_.size();
-    }
+    bool atEnd() const { return pos_ >= tokens_.size(); }
 
-    const Token* currentToken() const {
+    const Token *currentToken() const {
         if (atEnd()) {
             return nullptr;
         }
         return &tokens_[pos_];
     }
 
-private:
+  private:
     ExprPtr parseSequence() {
         ExprPtr left = parseOr();
         while (match(TokenType::SEMI)) {
@@ -160,10 +156,10 @@ private:
         }
 
         while (!atEnd()) {
-            const Token& tok = tokens_[pos_];
+            const Token &tok = tokens_[pos_];
             if (tok.type == TokenType::ASSIGNMENT && current.args.empty()) {
                 current.assignments.push_back(parseAssignment(tok.value));
-                ++pos_; 
+                ++pos_;
                 continue;
             }
             if (tok.type == TokenType::WORD) {
@@ -175,7 +171,7 @@ private:
                 tok.type == TokenType::APPEND || tok.type == TokenType::HEREDOC) {
                 ++pos_;
                 if (atEnd() || tokens_[pos_].type != TokenType::WORD) {
-                    const Token* near = atEnd() ? nullptr : &tokens_[pos_];
+                    const Token *near = atEnd() ? nullptr : &tokens_[pos_];
                     throw syntaxError("expected file or delimiter after redirection", near);
                 }
                 current.redirections.push_back({mapTokenToRedir(tok.type), tokens_[pos_].value});
@@ -191,8 +187,8 @@ private:
                 ++pos_;
                 continue;
             }
-            if (tok.type == TokenType::SEMI || tok.type == TokenType::AND_IF || tok.type == TokenType::OR_IF ||
-                tok.type == TokenType::RPAREN) {
+            if (tok.type == TokenType::SEMI || tok.type == TokenType::AND_IF ||
+                tok.type == TokenType::OR_IF || tok.type == TokenType::RPAREN) {
                 break;
             }
             break;
@@ -202,7 +198,7 @@ private:
             pipeline.commands.push_back(current);
         }
         if (pipeline.commands.empty()) {
-            const Token* near = atEnd() ? nullptr : &tokens_[pos_];
+            const Token *near = atEnd() ? nullptr : &tokens_[pos_];
             throw syntaxError("expected command", near);
         }
 
@@ -226,20 +222,20 @@ private:
         return false;
     }
 
-    void consume(TokenType type, const char* message) {
+    void consume(TokenType type, const char *message) {
         if (atEnd() || tokens_[pos_].type != type) {
-            const Token* near = atEnd() ? nullptr : &tokens_[pos_];
+            const Token *near = atEnd() ? nullptr : &tokens_[pos_];
             throw syntaxError(message, near);
         }
         ++pos_;
     }
 
-    const std::vector<Token>& tokens_;
+    const std::vector<Token> &tokens_;
     std::size_t pos_;
 };
 } // namespace
 
-ExprPtr Parser::parse(const std::vector<Token>& tokens) {
+ExprPtr Parser::parse(const std::vector<Token> &tokens) {
     ParserImpl parser(tokens);
     ExprPtr root = parser.parseExpression();
     if (!parser.atEnd()) {

@@ -4,6 +4,6 @@
 #include "../utils/Env.hpp"
 
 class Executor {
-public:
-    static int execute(const ExprPtr& root, Environment& env);
+  public:
+    static int execute(const ExprPtr &root, Environment &env);
 };

@@ -14,15 +14,11 @@
 #include <vector>
 
 namespace {
-bool isVarChar(char c) {
-    return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
-}
+bool isVarChar(char c) { return std::isalnum(static_cast<unsigned char>(c)) || c == '_'; }
 
-bool isVarStart(char c) {
-    return std::isalpha(static_cast<unsigned char>(c)) || c == '_';
-}
+bool isVarStart(char c) { return std::isalpha(static_cast<unsigned char>(c)) || c == '_'; }
 
-bool isAssignmentWord(const std::string& word, std::string& key, std::string& value) {
+bool isAssignmentWord(const std::string &word, std::string &key, std::string &value) {
     std::size_t eq = word.find('=');
     if (eq == std::string::npos || eq == 0) {
         return false;
@@ -42,9 +38,8 @@ bool isAssignmentWord(const std::string& word, std::string& key, std::string& va
     return true;
 }
 
-std::string lookupVariable(const std::string& key,
-                           const Environment& env,
-                           const std::unordered_map<std::string, std::string>& overlay) {
+std::string lookupVariable(const std::string &key, const Environment &env,
+                           const std::unordered_map<std::string, std::string> &overlay) {
     auto it = overlay.find(key);
     if (it != overlay.end()) {
         return it->second;
@@ -52,9 +47,9 @@ std::string lookupVariable(const std::string& key,
     return env.get(key);
 }
 
-std::unordered_map<std::string, std::string> baseOverlay(const Environment& env) {
+std::unordered_map<std::string, std::string> baseOverlay(const Environment &env) {
     std::unordered_map<std::string, std::string> overlay;
-    for (const auto& entry : env.asList()) {
+    for (const auto &entry : env.asList()) {
         std::size_t eq = entry.find('=');
         if (eq != std::string::npos) {
             overlay[entry.substr(0, eq)] = entry.substr(eq + 1);
@@ -64,11 +59,11 @@ std::unordered_map<std::string, std::string> baseOverlay(const Environment& env)
 }
 
 class ScopedProcessEnv {
-public:
-    explicit ScopedProcessEnv(const std::unordered_map<std::string, std::string>& overlay) {
+  public:
+    explicit ScopedProcessEnv(const std::unordered_map<std::string, std::string> &overlay) {
         saved_.reserve(overlay.size());
-        for (const auto& kv : overlay) {
-            const char* current = std::getenv(kv.first.c_str());
+        for (const auto &kv : overlay) {
+            const char *current = std::getenv(kv.first.c_str());
             if (current != nullptr) {
                 saved_.push_back({kv.first, std::string(current), true});
             } else {
@@ -88,7 +83,7 @@ public:
         }
     }
 
-private:
+  private:
     struct SavedValue {
         std::string key;
         std::string value;
@@ -98,12 +93,11 @@ private:
     std::vector<SavedValue> saved_;
 };
 
-std::string expandWord(const std::string& word,
-                       const Environment& env,
-                       const std::unordered_map<std::string, std::string>& overlay);
+std::string expandWord(const std::string &word, const Environment &env,
+                       const std::unordered_map<std::string, std::string> &overlay);
 
-std::string runCommandSubstitution(const std::string& command,
-                                   const std::unordered_map<std::string, std::string>& overlay) {
+std::string runCommandSubstitution(const std::string &command,
+                                   const std::unordered_map<std::string, std::string> &overlay) {
     ScopedProcessEnv scope(overlay);
 
     int pipefd[2];
@@ -120,7 +114,8 @@ std::string runCommandSubstitution(const std::string& command,
 
     if (pid == 0) {
         if (dup2(pipefd[1], STDOUT_FILENO) < 0) {
-            std::cout.flush(); std::cerr.flush();
+            std::cout.flush();
+            std::cerr.flush();
             _exit(127);
         }
         close(pipefd[0]);
@@ -131,10 +126,12 @@ std::string runCommandSubstitution(const std::string& command,
             auto tokens = Lexer::tokenize(command, subEnv);
             auto program = Parser::parse(tokens);
             int code = Executor::execute(program, subEnv);
-            std::cout.flush(); std::cerr.flush();
+            std::cout.flush();
+            std::cerr.flush();
             _exit(code);
-        } catch (const std::exception&) {
-            std::cout.flush(); std::cerr.flush();
+        } catch (const std::exception &) {
+            std::cout.flush();
+            std::cerr.flush();
             _exit(2);
         }
     }
@@ -159,10 +156,9 @@ std::string runCommandSubstitution(const std::string& command,
     return output;
 }
 
-std::string parseCommandSubstitution(const std::string& input,
-                                     std::size_t& i,
-                                     const Environment& env,
-                                     const std::unordered_map<std::string, std::string>& overlay) {
+std::string parseCommandSubstitution(const std::string &input, std::size_t &i,
+                                     const Environment &env,
+                                     const std::unordered_map<std::string, std::string> &overlay) {
     std::size_t start = i + 2;
     std::size_t depth = 1;
     bool inSingle = false;
@@ -222,9 +218,8 @@ std::string parseCommandSubstitution(const std::string& input,
     return "";
 }
 
-std::string expandWord(const std::string& word,
-                       const Environment& env,
-                       const std::unordered_map<std::string, std::string>& overlay) {
+std::string expandWord(const std::string &word, const Environment &env,
+                       const std::unordered_map<std::string, std::string> &overlay) {
     std::string out;
     for (std::size_t i = 0; i < word.size(); ++i) {
         char c = word[i];
@@ -269,16 +264,14 @@ std::string expandWord(const std::string& word,
     return out;
 }
 
-std::string readWord(const std::string& input,
-                     std::size_t& i,
-                     const Environment& env,
-                     const std::unordered_map<std::string, std::string>& overlay) {
+std::string readWord(const std::string &input, std::size_t &i, const Environment &env,
+                     const std::unordered_map<std::string, std::string> &overlay) {
     std::string current;
 
     while (i < input.size()) {
         char c = input[i];
-        if (std::isspace(static_cast<unsigned char>(c)) || c == '|' || c == '&' || c == '(' || c == ')' ||
-            c == '<' || c == '>' || c == ';') {
+        if (std::isspace(static_cast<unsigned char>(c)) || c == '|' || c == '&' || c == '(' ||
+            c == ')' || c == '<' || c == '>' || c == ';') {
             break;
         }
 
@@ -388,10 +381,8 @@ std::string readWord(const std::string& input,
     return current;
 }
 
-void maybeEmitWord(std::vector<Token>& tokens,
-                   const std::string& word,
-                   bool& commandStart,
-                   std::unordered_map<std::string, std::string>& overlay) {
+void maybeEmitWord(std::vector<Token> &tokens, const std::string &word, bool &commandStart,
+                   std::unordered_map<std::string, std::string> &overlay) {
     if (word.empty()) {
         return;
     }
@@ -410,7 +401,7 @@ void maybeEmitWord(std::vector<Token>& tokens,
     commandStart = false;
 }
 
-void resetOverlay(std::unordered_map<std::string, std::string>& overlay, const Environment& env) {
+void resetOverlay(std::unordered_map<std::string, std::string> &overlay, const Environment &env) {
     (void)overlay;
     (void)env;
     // Intentionally left blank to allow assignments to persist across semicolons and operators
@@ -418,7 +409,7 @@ void resetOverlay(std::unordered_map<std::string, std::string>& overlay, const E
 }
 } // namespace
 
-std::vector<Token> Lexer::tokenize(const std::string& input, const Environment& env) {
+std::vector<Token> Lexer::tokenize(const std::string &input, const Environment &env) {
     std::vector<Token> tokens;
     std::unordered_map<std::string, std::string> overlay = baseOverlay(env);
     bool commandStart = true;
@@ -447,7 +438,7 @@ std::vector<Token> Lexer::tokenize(const std::string& input, const Environment& 
             continue;
         }
 
-        if (c == '|' ) {
+        if (c == '|') {
             tokens.push_back({TokenType::PIPE, "|"});
             commandStart = true;
             resetOverlay(overlay, env);

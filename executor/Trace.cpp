@@ -11,7 +11,7 @@ std::string timelineBar(long long durationMs) {
     return std::string(static_cast<std::size_t>(width), '-');
 }
 
-std::string jsonEscape(const std::string& value) {
+std::string jsonEscape(const std::string &value) {
     std::string out;
     out.reserve(value.size());
     for (char c : value) {
@@ -49,7 +49,7 @@ std::string jsonEscape(const std::string& value) {
     return out;
 }
 
-std::string dotEscape(const std::string& text) {
+std::string dotEscape(const std::string &text) {
     std::string out;
     out.reserve(text.size());
     for (char c : text) {
@@ -61,19 +61,19 @@ std::string dotEscape(const std::string& text) {
     return out;
 }
 
-void emitSimple(const Trace::Event& evt) {
+void emitSimple(const Trace::Event &evt) {
     std::cerr << "[TRACE] " << evt.description << " (pgid " << evt.processGroup << ") => "
               << evt.exitCode << " (" << evt.elapsedMs << "ms)\n";
 }
 
-void emitJson(const Trace::Event& evt) {
+void emitJson(const Trace::Event &evt) {
     std::cerr << "{\n";
     std::cerr << "  \"description\": \"" << jsonEscape(evt.description) << "\",\n";
     std::cerr << "  \"process_group\": " << evt.processGroup << ",\n";
     std::cerr << "  \"commands\": [\n";
     for (std::size_t i = 0; i < evt.commands.size(); ++i) {
-        std::cerr << "    {\"cmd\": \"" << jsonEscape(evt.commands[i].cmd) << "\", \"pid\": "
-                  << evt.commands[i].pid
+        std::cerr << "    {\"cmd\": \"" << jsonEscape(evt.commands[i].cmd)
+                  << "\", \"pid\": " << evt.commands[i].pid
                   << ", \"start_ms\": " << evt.commands[i].startMs
                   << ", \"duration_ms\": " << evt.commands[i].durationMs << "}";
         if (i + 1 < evt.commands.size()) {
@@ -87,7 +87,7 @@ void emitJson(const Trace::Event& evt) {
     std::cerr << "}\n";
 }
 
-void emitGraph(const Trace::Event& evt) {
+void emitGraph(const Trace::Event &evt) {
     std::cerr << "[TRACE GRAPH] " << evt.description << "\n";
     for (std::size_t i = 0; i < evt.commands.size(); ++i) {
         std::cerr << "  " << evt.commands[i].cmd << " (pid " << evt.commands[i].pid << ", "
@@ -100,9 +100,9 @@ void emitGraph(const Trace::Event& evt) {
     std::cerr << "  Exit: " << evt.exitCode << ", Time: " << evt.elapsedMs << "ms\n";
 }
 
-void emitTimeline(const Trace::Event& evt) {
+void emitTimeline(const Trace::Event &evt) {
     std::cerr << "[TRACE TIMELINE] " << evt.description << "\n";
-    for (const auto& command : evt.commands) {
+    for (const auto &command : evt.commands) {
         std::string label = command.cmd.empty() ? "<command>" : command.cmd;
         std::cerr << "  " << label;
         if (label.size() < 12) {
@@ -118,17 +118,17 @@ void emitTimeline(const Trace::Event& evt) {
     std::cerr << " " << timelineBar(evt.elapsedMs) << " " << evt.elapsedMs << "ms\n";
 }
 
-void emitDot(const Trace::Event& evt) {
+void emitDot(const Trace::Event &evt) {
     std::cerr << "digraph mysh_trace {\n";
     std::cerr << "  rankdir=LR;\n";
     std::cerr << "  label=\"exit=" << evt.exitCode << ", total=" << evt.elapsedMs << "ms\";\n";
     std::cerr << "  labelloc=t;\n";
     for (std::size_t i = 0; i < evt.commands.size(); ++i) {
-        const auto& command = evt.commands[i];
+        const auto &command = evt.commands[i];
         std::string node = "n" + std::to_string(i);
         std::string label = (command.cmd.empty() ? std::string("<command>") : command.cmd) +
-                            "\\npid=" + std::to_string(command.pid) +
-                            "\\n" + std::to_string(command.durationMs) + "ms";
+                            "\\npid=" + std::to_string(command.pid) + "\\n" +
+                            std::to_string(command.durationMs) + "ms";
         std::cerr << "  " << node << " [shape=box, label=\"" << dotEscape(label) << "\"];\n";
         if (i + 1 < evt.commands.size()) {
             std::cerr << "  " << node << " -> n" << (i + 1) << " [label=\"pipe\"];\n";
@@ -141,11 +141,11 @@ void emitDot(const Trace::Event& evt) {
 
 namespace Trace {
 
-bool enabled(const Environment& env) {
+bool enabled(const Environment &env) {
     return !env.get("MYSH_TRACE").empty() && env.get("MYSH_TRACE") != "0";
 }
 
-std::string mode(const Environment& env) {
+std::string mode(const Environment &env) {
     std::string traceMode = env.get("MYSH_TRACE");
     if (traceMode.empty() || traceMode == "1") {
         return "simple";
@@ -153,7 +153,7 @@ std::string mode(const Environment& env) {
     return traceMode;
 }
 
-void emit(const Event& evt, const std::string& mode) {
+void emit(const Event &evt, const std::string &mode) {
     if (mode == "json") {
         emitJson(evt);
     } else if (mode == "graph") {

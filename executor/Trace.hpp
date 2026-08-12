@@ -23,8 +23,8 @@ struct Event {
     long long elapsedMs;
 };
 
-bool enabled(const Environment& env);
-std::string mode(const Environment& env);
-void emit(const Event& evt, const std::string& mode);
+bool enabled(const Environment &env);
+std::string mode(const Environment &env);
+void emit(const Event &evt, const std::string &mode);
 
 } // namespace Trace

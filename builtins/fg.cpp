@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-int builtin_fg(const std::vector<std::string>& args) {
+int builtin_fg(const std::vector<std::string> &args) {
     if (args.size() < 2) {
         std::cerr << "fg: usage: fg <job_id>\n";
         return 1;

@@ -10,13 +10,13 @@
 
 namespace {
 
-void require(bool condition, const std::string& message) {
+void require(bool condition, const std::string &message) {
     if (!condition) {
         throw std::runtime_error(message);
     }
 }
 
-int runLine(const std::string& line, Environment& env) {
+int runLine(const std::string &line, Environment &env) {
     auto tokens = Lexer::tokenize(line, env);
     auto program = Parser::parse(tokens);
     return Executor::execute(program, env);
@@ -68,7 +68,7 @@ void testParserErrors() {
     try {
         auto tokens = Lexer::tokenize("echo a | | wc", env);
         (void)Parser::parse(tokens);
-    } catch (const std::exception&) {
+    } catch (const std::exception &) {
         threw = true;
     }
     require(threw, "parser should throw on malformed pipeline");
@@ -86,7 +86,7 @@ int main() {
         testParserErrors();
         std::cout << "unit tests passed\n";
         return 0;
-    } catch (const std::exception& ex) {
+    } catch (const std::exception &ex) {
         std::cerr << "unit test failed: " << ex.what() << "\n";
         return 1;
     }

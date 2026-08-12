@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace {
-bool isValidIdentifier(const std::string& name) {
+bool isValidIdentifier(const std::string &name) {
     if (name.empty()) {
         return false;
     }
@@ -23,9 +23,9 @@ bool isValidIdentifier(const std::string& name) {
 }
 } // namespace
 
-int builtin_export(const std::vector<std::string>& args, Environment& env) {
+int builtin_export(const std::vector<std::string> &args, Environment &env) {
     if (args.size() == 1) {
-        for (const auto& item : env.asList()) {
+        for (const auto &item : env.asList()) {
             std::cout << "declare -x " << item << "\n";
         }
         return 0;
