@@ -107,6 +107,7 @@ lint:
 coverage: CXXFLAGS += -g -O0 --coverage
 coverage: LDFLAGS += --coverage
 coverage: fclean all
+	$(MAKE) check CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)"
 	bash scripts/coverage.sh ./$(TARGET)
 
 debug: CXXFLAGS += -g -O0

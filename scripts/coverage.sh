@@ -8,8 +8,6 @@ if [[ ! -x "$BIN" ]]; then
   exit 1
 fi
 
-make check
-
 if command -v gcovr >/dev/null 2>&1; then
   mkdir -p coverage
   gcovr --root . --xml-pretty --output coverage/coverage.xml
