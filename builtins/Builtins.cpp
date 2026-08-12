@@ -1,5 +1,6 @@
 #include "Builtins.hpp"
 
+#include <iostream>
 #include <string>
 
 int builtin_cd(const std::vector<std::string>& args, Environment& env);
