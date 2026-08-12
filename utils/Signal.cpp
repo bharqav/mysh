@@ -10,7 +10,9 @@ void handleSigint(int) {
     const char* prompt = "\nmysh> ";
     const char* newline = "\n";
     const char* out = g_prompting ? prompt : newline;
-    write(STDOUT_FILENO, out, g_prompting ? 7 : 1);
+    if (write(STDOUT_FILENO, out, g_prompting ? 7 : 1) < 0) {
+        // Ignored in signal handler
+    }
 }
 } // namespace
 

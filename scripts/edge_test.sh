@@ -2,6 +2,9 @@
 set -euo pipefail
 
 BIN="${1:-./mysh}"
+if [[ "$BIN" != /* ]]; then
+  BIN="$PWD/$BIN"
+fi
 
 if [[ ! -x "$BIN" ]]; then
   echo "error: binary '$BIN' not found or not executable"
