@@ -194,28 +194,38 @@ void Shell::run() {
     read_history(".mysh_history");
 #endif
 
+    bool isInteractive = isatty(STDIN_FILENO);
+
     while (true) {
         Jobs::reapFinished();
         std::string input;
 #ifdef USE_READLINE
-        Signal::setPrompting(false);
-        char *line = readline("mysh> ");
-        Signal::setPrompting(true);
-        if (line == nullptr) {
-            std::cout << "\n";
-            break;
+        if (isInteractive) {
+            Signal::setPrompting(false);
+            char* line = readline("mysh> ");
+            Signal::setPrompting(true);
+            if (line == nullptr) {
+                std::cout << "\n";
+                break;
+            }
+            input = line;
+            if (!input.empty()) {
+                add_history(line);
+            }
+            free(line);
+        } else {
+            if (!std::getline(std::cin, input)) {
+                break;
+            }
         }
-        input = line;
-        if (!input.empty()) {
-            add_history(line);
-        }
-        free(line);
 #else
-        std::cout << "mysh> " << std::flush;
+        if (isInteractive) {
+            std::cout << "mysh> " << std::flush;
+        }
         Signal::setPrompting(false);
         if (!std::getline(std::cin, input)) {
             Signal::setPrompting(true);
-            std::cout << "\n";
+            if (isInteractive) std::cout << "\n";
             break;
         }
         Signal::setPrompting(true);
