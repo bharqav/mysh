@@ -1,0 +1,7 @@
+scenario,runs,median_ms,p95_ms
+startup_empty,7,5,8
+simple_echo,7,7,12
+pipeline_echo_wc,7,12,19
+logical_group,7,9,15
+redir_write_read,7,10,17
+glob_expand,7,9,14

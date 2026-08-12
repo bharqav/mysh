@@ -1,0 +1,26 @@
+# Build artifacts
+*.o
+*.obj
+*.exe
+mysh
+mysh_unit
+
+# Coverage
+*.gcda
+*.gcno
+coverage/
+
+# History
+.mysh_history
+
+# Editor directories
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Misc
+*.log

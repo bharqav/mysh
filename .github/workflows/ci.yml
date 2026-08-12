@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            compiler: g++
+          - os: ubuntu-latest
+            compiler: clang++
+          - os: macos-latest
+            compiler: clang++
+    runs-on: ${{ matrix.os }}
+    env:
+      CXX: ${{ matrix.compiler }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y build-essential make libreadline-dev clang cppcheck clang-tidy clang-format gcovr
+          else
+            brew update
+            brew install readline cppcheck llvm
+            echo "/opt/homebrew/opt/llvm/bin" >> "$GITHUB_PATH"
+          fi
+      - name: Build
+        run: make
+      - name: Smoke test
+        run: make test
+      - name: Regression test
+        run: make regression
+      - name: Edge test
+        run: make edge
+      - name: Unit tests
+        run: make unit
+      - name: Lint checks
+        run: make lint
+      - name: Build without readline
+        run: make fclean && make READLINE=0
+
+  sanitizers:
+    runs-on: ubuntu-latest
+    env:
+      CXX: clang++
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential make libreadline-dev clang
+      - name: ASAN runtime checks
+        run: make asan-check
+
+  coverage:
+    runs-on: ubuntu-latest
+    env:
+      CXX: g++
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential make libreadline-dev gcovr
+      - name: Coverage
+        run: make coverage
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+
+  benchmark-guard:
+    runs-on: ubuntu-latest
+    env:
+      CXX: g++
+      RUNS: 3
+      WARMUP: 1
+      BENCH_REGRESSION_PCT: 50
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential make libreadline-dev
+      - name: Build and benchmark
+        run: make benchmark
+      - name: Benchmark regression guard
+        run: make benchmark-guard
