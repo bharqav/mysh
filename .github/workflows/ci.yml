@@ -30,8 +30,9 @@ jobs:
             sudo apt-get install -y build-essential make libreadline-dev clang cppcheck clang-tidy clang-format gcovr
           else
             brew update
-            brew install readline cppcheck llvm
-            echo "/opt/homebrew/opt/llvm/bin" >> "$GITHUB_PATH"
+            brew install readline cppcheck llvm@15
+            echo "/opt/homebrew/opt/llvm@15/bin" >> "$GITHUB_PATH"
+            export PATH="/opt/homebrew/opt/llvm@15/bin:$PATH"
           fi
       - name: Build
         run: make
