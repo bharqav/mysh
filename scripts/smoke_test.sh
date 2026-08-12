@@ -47,7 +47,7 @@ help
 exit 0
 EOF
 
-"$BIN" < test_input.mysh > output.txt
+"$BIN" < test_input.mysh > output.txt 2>&1
 
 assert_contains() {
   local needle="$1"

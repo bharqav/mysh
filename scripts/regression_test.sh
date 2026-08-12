@@ -44,7 +44,7 @@ help
 exit 0
 EOF
 
-"$BIN" < regression.mysh > out.txt
+"$BIN" < regression.mysh > out.txt 2>&1
 
 assert_contains() {
   local needle="$1"
