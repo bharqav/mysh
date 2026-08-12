@@ -302,6 +302,7 @@ int executePipeline(const Pipeline& pipeline, Environment& env, bool background)
             }
 
             if (applyRedirections(pipeline.commands[i]) != 0) {
+                std::cout.flush(); std::cerr.flush();
                 _exit(1);
             }
 
@@ -309,6 +310,7 @@ int executePipeline(const Pipeline& pipeline, Environment& env, bool background)
                 Builtins::isBuiltin(pipeline.commands[i].args[0])) {
                 std::vector<std::string> args = expandWildcards(pipeline.commands[i].args);
                 int code = Builtins::run(args, env, false);
+                std::cout.flush(); std::cerr.flush();
                 _exit(code);
             }
 
@@ -321,6 +323,7 @@ int executePipeline(const Pipeline& pipeline, Environment& env, bool background)
 
             execvp(argv[0], argv.data());
             perror("execvp");
+            std::cout.flush(); std::cerr.flush();
             _exit(127);
         }
 
@@ -447,6 +450,7 @@ int evaluateNode(const Expr* node, Environment& env) {
         }
         if (pid == 0) {
             int code = evaluate(node->left.get(), env);
+            std::cout.flush(); std::cerr.flush();
             _exit(code);
         }
 

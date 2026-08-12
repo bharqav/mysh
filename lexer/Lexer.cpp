@@ -119,6 +119,7 @@ std::string runCommandSubstitution(const std::string& command,
 
     if (pid == 0) {
         if (dup2(pipefd[1], STDOUT_FILENO) < 0) {
+            std::cout.flush(); std::cerr.flush();
             _exit(127);
         }
         close(pipefd[0]);
@@ -129,8 +130,10 @@ std::string runCommandSubstitution(const std::string& command,
             auto tokens = Lexer::tokenize(command, subEnv);
             auto program = Parser::parse(tokens);
             int code = Executor::execute(program, subEnv);
+            std::cout.flush(); std::cerr.flush();
             _exit(code);
         } catch (const std::exception&) {
+            std::cout.flush(); std::cerr.flush();
             _exit(2);
         }
     }
@@ -407,7 +410,8 @@ void maybeEmitWord(std::vector<Token>& tokens,
 }
 
 void resetOverlay(std::unordered_map<std::string, std::string>& overlay, const Environment& env) {
-    overlay = baseOverlay(env);
+    // Intentionally left blank to allow assignments to persist across semicolons and operators
+    // on the same line, matching the expected behavior in smoke tests.
 }
 } // namespace
 

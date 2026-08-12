@@ -17,12 +17,12 @@ fi
 
 awk -F',' -v allow_pct="$ALLOW_PCT" '
 FNR==NR {
-  if (NR > 1) {
+  if (FNR > 1) {
     base[$1] = $3
   }
   next
 }
-NR > 1 {
+FNR > 1 {
   scenario = $1
   current = $3 + 0
   if (!(scenario in base)) {
