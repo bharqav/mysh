@@ -6,6 +6,7 @@
 #include <cctype>
 #include <cstdlib>
 #include <exception>
+#include <iostream>
 #include <string>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -410,6 +411,8 @@ void maybeEmitWord(std::vector<Token>& tokens,
 }
 
 void resetOverlay(std::unordered_map<std::string, std::string>& overlay, const Environment& env) {
+    (void)overlay;
+    (void)env;
     // Intentionally left blank to allow assignments to persist across semicolons and operators
     // on the same line, matching the expected behavior in smoke tests.
 }
