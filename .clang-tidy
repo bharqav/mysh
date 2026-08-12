@@ -3,6 +3,7 @@ Checks: >-
   bugprone-*,
   performance-*,
   portability-*,
+  -portability-avoid-pragma-once,
   readability-*
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
